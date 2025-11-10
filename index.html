@@ -37,20 +37,22 @@
   }
   .msg {
     max-width:75%;
-    min-width:50px;
-    padding:14px 20px;       /* größere Blasen */
-    border-radius:20px;      /* rund auf allen Ecken */
-    word-wrap:break-word;
+    padding:14px 18px;
+    word-wrap: break-word;
     display:inline-block;
     line-height:1.4;
   }
+  /* eigene Nachrichten rechts */
   .me {
-    align-self:flex-end;
-    color:black;
+    align-self: flex-end;
+    color: black;
+    border-radius: 18px 18px 4px 18px; /* oben-left, oben-right, unten-right, unten-left */
   }
+  /* andere Nachrichten links */
   .other {
-    align-self:flex-start;
-    color:white;
+    align-self: flex-start;
+    color: white;
+    border-radius: 18px 18px 18px 4px;
   }
   #input-area {
     display:flex;
