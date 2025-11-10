@@ -36,14 +36,24 @@
     gap:8px;
   }
   .msg {
-    max-width:75%;
-    padding:8px 12px;
-    border-radius:18px;
-    word-wrap:break-word;
-    display:inline-block;
-  }
-  .me { align-self:flex-end; color:black; }
-  .other { align-self:flex-start; color:white; }
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 20px 20px 20px 5px; /* abgerundete Blase */
+  word-wrap: break-word;
+  display: inline-block;
+}
+
+.me {
+  align-self: flex-end;
+  color: black;
+  border-radius: 20px 20px 5px 20px; /* eigene Nachrichten rechts */
+}
+
+.other {
+  align-self: flex-start;
+  color: white;
+  border-radius: 20px 20px 20px 5px; /* andere Nachrichten links */
+}
   #input-area { display:flex; gap:8px; padding-top:5px; }
   input,button { font-size:16px; padding:8px; border-radius:20px; border:none; }
   input { flex:1; }
