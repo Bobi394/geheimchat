@@ -33,26 +33,25 @@
     padding:10px;
     display:flex;
     flex-direction:column;
-    gap:8px;
+    gap:10px;
   }
   .msg {
     max-width:75%;
-    padding:14px 18px;
+    min-width:60px;           /* Mindestbreite für kleine Nachrichten */
+    padding:20px 24px;         /* größerer Innenabstand */
     word-wrap: break-word;
     display:inline-block;
-    line-height:1.4;
+    line-height:1.5;
   }
-  /* eigene Nachrichten rechts */
   .me {
-    align-self: flex-end;
-    color: black;
-    border-radius: 18px 18px 4px 18px; /* oben-left, oben-right, unten-right, unten-left */
+    align-self:flex-end;
+    color:black;
+    border-radius: 25px 25px 5px 25px; /* WhatsApp-artige Blase rechts */
   }
-  /* andere Nachrichten links */
   .other {
-    align-self: flex-start;
-    color: white;
-    border-radius: 18px 18px 18px 4px;
+    align-self:flex-start;
+    color:white;
+    border-radius: 25px 25px 25px 5px; /* WhatsApp-artige Blase links */
   }
   #input-area {
     display:flex;
@@ -61,8 +60,8 @@
   }
   input,button {
     font-size:16px;
-    padding:8px;
-    border-radius:20px;
+    padding:10px;
+    border-radius:25px;
     border:none;
   }
   input { flex:1; }
