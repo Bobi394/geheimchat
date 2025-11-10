@@ -5,45 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Geheimchat 🔐</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background:#0f1720;
-    color:white;
-    margin:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
-  #chat {
-    width:90%;
-    max-width:600px;
-    background:#13213a;
-    border-radius:10px;
-    margin-top:20px;
-    padding:10px;
-    display:flex;
-    flex-direction:column;
-    height:80vh;
-  }
-  #messages {
-    flex:1;
-    overflow-y:auto;
-    padding:10px;
-  }
-  .msg {
-    padding:8px 10px;
-    border-radius:10px;
-    margin:5px 0;
-    max-width:75%;
-    word-wrap:break-word;
-  }
-  .me {background:#0ea5a3;color:black;align-self:flex-end;}
-  .self-again {background:#3b82f6;color:white;align-self:flex-end;}
-  .other {background:#1e293b;align-self:flex-start;}
-  #input-area {display:flex;gap:8px;}
-  input,button {font-size:16px;padding:8px;border-radius:8px;border:none;}
-  input {flex:1;}
-  button {background:#0ea5a3;color:black;font-weight:bold;cursor:pointer;}
+  body { font-family: Arial; background:#0f1720; color:white; margin:0; display:flex; flex-direction:column; align-items:center; }
+  #chat { width:90%; max-width:600px; background:#13213a; border-radius:10px; margin-top:20px; padding:10px; display:flex; flex-direction:column; height:80vh; }
+  #messages { flex:1; overflow-y:auto; padding:10px; }
+  .msg { padding:8px 10px; border-radius:10px; margin:5px 0; max-width:75%; word-wrap:break-word; position:relative; }
+  .other { background:#1e293b; align-self:flex-start; }
+  .me { background:#0ea5a3; color:black; align-self:flex-end; }
+  .delete-btn { position:absolute; top:2px; right:2px; font-size:12px; cursor:pointer; color:#ff6b6b; background:transparent; border:none; }
+  .reactions { margin-top:4px; font-size:14px; display:flex; gap:6px; }
+  .reaction-btn { cursor:pointer; user-select:none; }
+  #input-area { display:flex; gap:8px; }
+  input, button { font-size:16px; padding:8px; border-radius:8px; border:none; }
+  input { flex:1; }
+  button { background:#0ea5a3; color:black; font-weight:bold; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -58,59 +32,92 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded, remove, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-  // deine Firebase-Konfiguration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFX3VvV6KL1CJvKwWYSnDNTTfYXC6MFu4",
-    authDomain: "geheimchat-eeaaa.firebaseapp.com",
-    databaseURL: "https://geheimchat-eeaaa-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "geheimchat-eeaaa",
-    storageBucket: "geheimchat-eeaaa.firebasestorage.app",
-    messagingSenderId: "276652285435",
-    appId: "1:276652285435:web:8b74170f2bc7f361b37f5e"
-  };
+// 🔹 Firebase-Konfiguration
+const firebaseConfig = {
+  apiKey: "AIzaSyDFX3VvV6KL1CJvKwWYSnDNTTfYXC6MFu4",
+  authDomain: "geheimchat-eeaaa.firebaseapp.com",
+  databaseURL: "https://geheimchat-eeaaa-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "geheimchat-eeaaa",
+  storageBucket: "geheimchat-eeaaa.firebasestorage.app",
+  messagingSenderId: "276652285435",
+  appId: "1:276652285435:web:8b74170f2bc7f361b37f5e"
+};
 
-  // Firebase initialisieren
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const messagesRef = ref(db, "messages");
+// 🔹 Firebase initialisieren
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const messagesRef = ref(db, "messages");
 
-  const messagesDiv = document.getElementById("messages");
-  const input = document.getElementById("msg");
-  const sendBtn = document.getElementById("send");
+const messagesDiv = document.getElementById("messages");
+const input = document.getElementById("msg");
+const sendBtn = document.getElementById("send");
 
-  // letzten Namen merken / laden
-  let lastName = localStorage.getItem("geheimchat_username");
-  let username = prompt("Wie heißt du? 👤", lastName || "") || "Unbekannt";
-  localStorage.setItem("geheimchat_username", username);
+// Benutzername merken
+let lastName = localStorage.getItem("geheimchat_username");
+let username = prompt("Wie heißt du? 👤", lastName || "") || "Unbekannt";
+localStorage.setItem("geheimchat_username", username);
 
-  // Nachrichten anzeigen
-  onChildAdded(messagesRef, (snapshot) => {
-    const msg = snapshot.val();
-    const div = document.createElement("div");
+// Farbzuweisung pro Nutzer
+const userColors = {};
+const colorList = ["#0ea5a3","#3b82f6","#eab308","#ef4444","#f97316","#8b5cf6"];
+function getUserColor(user){
+  if(!userColors[user]){
+    userColors[user] = colorList[Object.keys(userColors).length % colorList.length];
+  }
+  return userColors[user];
+}
 
-    // gleiche Person wie der aktuelle Nutzer?
-    if (msg.user === username) {
-      // falls dieser Name schon einmal benutzt wurde (steht in localStorage)
-      div.className = (lastName === username) ? "msg self-again" : "msg me";
-    } else {
-      div.className = "msg other";
-    }
+// Nachrichten anzeigen
+onChildAdded(messagesRef, (snapshot) => {
+  const msg = snapshot.val();
+  const div = document.createElement("div");
+  div.className = (msg.user === username) ? "me" : "other";
+  div.style.backgroundColor = getUserColor(msg.user);
 
-    div.textContent = msg.user + ": " + msg.text;
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  // Klickbare Links
+  const textWithLinks = msg.text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#fff;text-decoration:underline;">$1</a>');
+  div.innerHTML = `<strong>${msg.user}</strong>: ${textWithLinks}`;
+
+  // 🗑️ Löschen nur eigene Nachricht
+  if(msg.user === username){
+    const del = document.createElement("button");
+    del.textContent = "🗑️";
+    del.className = "delete-btn";
+    del.onclick = () => remove(ref(db, "messages/"+snapshot.key));
+    div.appendChild(del);
+  }
+
+  // ❤️👍😂 Reaktionen
+  const reactionsDiv = document.createElement("div");
+  reactionsDiv.className = "reactions";
+  ["❤️","👍","😂"].forEach(emoji=>{
+    const btn = document.createElement("span");
+    btn.textContent = emoji + (msg.reactions && msg.reactions[emoji] ? " "+msg.reactions[emoji] : "");
+    btn.className = "reaction-btn";
+    btn.onclick = () => {
+      const current = msg.reactions && msg.reactions[emoji] ? msg.reactions[emoji] : 0;
+      const updates = {};
+      updates["messages/"+snapshot.key+"/reactions/"+emoji] = current+1;
+      update(ref(db), updates);
+    };
+    reactionsDiv.appendChild(btn);
   });
+  div.appendChild(reactionsDiv);
 
-  // Nachricht senden
-  sendBtn.onclick = () => {
-    const text = input.value.trim();
-    if (!text) return;
-    push(messagesRef, { user: username, text, time: Date.now() });
-    input.value = "";
-  };
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+
+// Nachricht senden
+sendBtn.onclick = () => {
+  const text = input.value.trim();
+  if(!text) return;
+  push(messagesRef, {user: username, text: text, time: Date.now()});
+  input.value = "";
+};
 </script>
 </body>
 </html>
