@@ -45,44 +45,14 @@
     max-width: 70%;
     padding: 8px 12px;
     border-radius: 18px;
-    position: relative;
     word-wrap: break-word;
     display: inline-block;
   }
 
-  .me {
-    align-self: flex-end;
-    background-color: #dcf8c6;
-    color: #000;
-  }
-
-  .other {
-    align-self: flex-start;
-    background-color: #ffffff;
-    color: #000;
-  }
+  .me { align-self: flex-end; color: #000; }
+  .other { align-self: flex-start; color: #000; }
 
   .msg strong { font-weight: bold; }
-
-  .delete-btn {
-    position: absolute;
-    top: 2px;
-    right: 4px;
-    font-size: 12px;
-    cursor: pointer;
-    color: #ff6b6b;
-    background: transparent;
-    border: none;
-  }
-
-  .reactions {
-    margin-top: 4px;
-    display: flex;
-    gap: 6px;
-    font-size: 14px;
-  }
-
-  .reaction-btn { cursor: pointer; user-select: none; }
 
   #input-area {
     display: flex;
@@ -127,7 +97,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, remove, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDFX3VvV6KL1CJvKwWYSnDNTTfYXC6MFu4",
@@ -168,30 +138,6 @@ onChildAdded(messagesRef, (snapshot) => {
 
   const textWithLinks = msg.text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
   div.innerHTML = `<strong>${msg.user}</strong>: ${textWithLinks}`;
-
-  if(msg.user === username){
-    const del = document.createElement("button");
-    del.textContent = "🗑️";
-    del.className = "delete-btn";
-    del.onclick = () => remove(ref(db, "messages/"+snapshot.key));
-    div.appendChild(del);
-  }
-
-  const reactionsDiv = document.createElement("div");
-  reactionsDiv.className = "reactions";
-  ["❤️","👍","😂"].forEach(emoji=>{
-    const btn = document.createElement("span");
-    btn.textContent = emoji + (msg.reactions && msg.reactions[emoji] ? " "+msg.reactions[emoji] : "");
-    btn.className = "reaction-btn";
-    btn.onclick = () => {
-      const current = msg.reactions && msg.reactions[emoji] ? msg.reactions[emoji] : 0;
-      const updates = {};
-      updates["messages/"+snapshot.key+"/reactions/"+emoji] = current+1;
-      update(ref(db), updates);
-    };
-    reactionsDiv.appendChild(btn);
-  });
-  div.appendChild(reactionsDiv);
 
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
