@@ -61,18 +61,16 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
   import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-  // deine Firebase-Konfiguration
   const firebaseConfig = {
     apiKey: "AIzaSyDFX3VvV6KL1CJvKwWYSnDNTTfYXC6MFu4",
     authDomain: "geheimchat-eeaaa.firebaseapp.com",
     databaseURL: "https://geheimchat-eeaaa-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "geheimchat-eeaaa",
-    storageBucket: "geheimchat-eeaaa.firebasestorage.app",
+    storageBucket: "geheimchat-eeaaa.appspot.com",
     messagingSenderId: "276652285435",
     appId: "1:276652285435:web:8b74170f2bc7f361b37f5e"
   };
 
-  // Firebase initialisieren
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const messagesRef = ref(db, "messages");
@@ -81,36 +79,56 @@
   const input = document.getElementById("msg");
   const sendBtn = document.getElementById("send");
 
-  // letzten Namen merken / laden
   let lastName = localStorage.getItem("geheimchat_username");
   let username = prompt("Wie heißt du? 👤", lastName || "") || "Unbekannt";
   localStorage.setItem("geheimchat_username", username);
 
-  // Nachrichten anzeigen
+  function formatTime(ts) {
+    const d = new Date(ts);
+    return d.getHours().toString().padStart(2,"0") + ":" + d.getMinutes().toString().padStart(2,"0");
+  }
+
+  function linkify(text) {
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlPattern, '<a href="$1" target="_blank" style="color:#38bdf8;text-decoration:underline;">$1</a>');
+  }
+
   onChildAdded(messagesRef, (snapshot) => {
     const msg = snapshot.val();
     const div = document.createElement("div");
+    const timeSpan = document.createElement("span");
+    timeSpan.style.fontSize = "0.7em";
+    timeSpan.style.opacity = "0.7";
+    timeSpan.style.marginLeft = "6px";
+    timeSpan.textContent = formatTime(msg.time);
 
-    // gleiche Person wie der aktuelle Nutzer?
     if (msg.user === username) {
-      // falls dieser Name schon einmal benutzt wurde (steht in localStorage)
       div.className = (lastName === username) ? "msg self-again" : "msg me";
     } else {
       div.className = "msg other";
     }
 
-    div.textContent = msg.user + ": " + msg.text;
+    div.innerHTML = msg.user + ": " + linkify(msg.text);
+    div.appendChild(timeSpan);
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 
-  // Nachricht senden
-  sendBtn.onclick = () => {
+  function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
     push(messagesRef, { user: username, text, time: Date.now() });
     input.value = "";
-  };
+  }
+
+  sendBtn.onclick = sendMessage;
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
+
+  const emojiBtn = document.createElement("button");
+  emojiBtn.textContent = "😀";
+  emojiBtn.onclick = () => { input.value += "😀"; input.focus(); };
+  document.getElementById("input-area").prepend(emojiBtn);
+
 </script>
 </body>
 </html>
