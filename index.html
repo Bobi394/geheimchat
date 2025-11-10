@@ -7,67 +7,69 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    background:#0f1720;
-    color:white;
-    margin:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
+    background: #0f1720;
+    color: white;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   h2 { margin-top: 10px; color:#0ea5a3; }
   #chat {
-    width:90%;
-    max-width:600px;
-    background:#13213a;
-    border-radius:10px;
-    margin-top:20px;
-    padding:10px;
-    display:flex;
-    flex-direction:column;
-    height:80vh;
-    overflow:hidden;
+    width: 90%;
+    max-width: 600px;
+    background: #13213a;
+    border-radius: 10px;
+    margin-top: 20px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    overflow: hidden;
   }
   #messages {
-    flex:1;
-    overflow-y:auto;
-    padding:10px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
   .msg {
-    max-width:75%;
-    min-width:100px;       /* kleine Nachrichten nicht zu winzig */
-    padding:24px 28px;     /* viel Innenabstand, Blasen größer */
+    max-width: 75%;
+    min-width: 120px;          /* Blase auch bei kurzen Nachrichten groß */
+    padding: 18px 22px;        /* mehr Innenabstand = größere Blase */
     word-wrap: break-word;
-    display:inline-block;
-    line-height:1.4;
-    font-size:16px;        /* Text bleibt normal */
+    display: inline-block;
+    line-height: 1.4;
+    font-size: 16px;
   }
+  /* Eigene Nachrichten rechts */
   .me {
-    align-self:flex-end;
-    color:black;
-    border-radius: 28px 28px 6px 28px; /* WhatsApp-Blase rechts */
+    align-self: flex-end;
+    color: black;
+    border-radius: 24px 24px 4px 24px; /* oben-left, oben-right, unten-right, unten-left */
   }
+  /* Andere Nachrichten links */
   .other {
-    align-self:flex-start;
-    color:white;
-    border-radius: 28px 28px 28px 6px; /* WhatsApp-Blase links */
+    align-self: flex-start;
+    color: white;
+    border-radius: 24px 24px 24px 4px; 
   }
   #input-area {
-    display:flex;
-    gap:8px;
-    padding-top:5px;
+    display: flex;
+    gap: 8px;
+    padding-top: 5px;
   }
-  input,button {
-    font-size:16px;
-    padding:12px;
-    border-radius:28px;
-    border:none;
+  input, button {
+    font-size: 16px;
+    padding: 12px;
+    border-radius: 24px;
+    border: none;
   }
-  input { flex:1; }
-  button { background:#0ea5a3; color:black; font-weight:bold; cursor:pointer; }
-  a { color:#00ffff; text-decoration:underline; }
+  input { flex: 1; }
+  button { background: #0ea5a3; color: black; font-weight: bold; cursor: pointer; }
+  a { color: #00ffff; text-decoration: underline; }
 </style>
 </head>
 <body>
