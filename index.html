@@ -36,26 +36,34 @@
     gap:8px;
   }
   .msg {
-  max-width: 75%;
-  padding: 10px 14px;
-  border-radius: 20px 20px 20px 5px; /* abgerundete Blase */
-  word-wrap: break-word;
-  display: inline-block;
-}
-
-.me {
-  align-self: flex-end;
-  color: black;
-  border-radius: 20px 20px 5px 20px; /* eigene Nachrichten rechts */
-}
-
-.other {
-  align-self: flex-start;
-  color: white;
-  border-radius: 20px 20px 20px 5px; /* andere Nachrichten links */
-}
-  #input-area { display:flex; gap:8px; padding-top:5px; }
-  input,button { font-size:16px; padding:8px; border-radius:20px; border:none; }
+    max-width:75%;
+    padding:16px 20px;      /* größerer Innenabstand für größere Blase */
+    border-radius:20px 20px 20px 5px;
+    word-wrap:break-word;
+    display:inline-block;
+    line-height:1.4;
+  }
+  .me {
+    align-self:flex-end;
+    color:black;
+    border-radius:20px 20px 5px 20px;
+  }
+  .other {
+    align-self:flex-start;
+    color:white;
+    border-radius:20px 20px 20px 5px;
+  }
+  #input-area {
+    display:flex;
+    gap:8px;
+    padding-top:5px;
+  }
+  input,button {
+    font-size:16px;
+    padding:8px;
+    border-radius:20px;
+    border:none;
+  }
   input { flex:1; }
   button { background:#0ea5a3; color:black; font-weight:bold; cursor:pointer; }
   a { color:#00ffff; text-decoration:underline; }
@@ -76,6 +84,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
+// 🔹 Firebase-Konfiguration
 const firebaseConfig = {
   apiKey: "AIzaSyDFX3VvV6KL1CJvKwWYSnDNTTfYXC6MFu4",
   authDomain: "geheimchat-eeaaa.firebaseapp.com",
@@ -86,6 +95,7 @@ const firebaseConfig = {
   appId: "1:276652435:web:8b74170f2bc7f361b37f5e"
 };
 
+// 🔹 Firebase initialisieren
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const messagesRef = ref(db, "messages");
@@ -94,11 +104,12 @@ const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("msg");
 const sendBtn = document.getElementById("send");
 
+// 🔹 Benutzername merken
 let lastName = localStorage.getItem("geheimchat_username");
 let username = prompt("Wie heißt du? 👤", lastName || "") || "Unbekannt";
 localStorage.setItem("geheimchat_username", username);
 
-// Farben pro Nutzer
+// 🔹 Farben pro Nutzer
 const userColors = {};
 const colorList = ["#0ea5a3","#3b82f6","#f59e0b","#ef4444","#10b981","#8b5cf6","#f472b6"];
 function getUserColor(user){
@@ -108,12 +119,14 @@ function getUserColor(user){
   return userColors[user];
 }
 
+// 🔹 Nachrichten anzeigen
 onChildAdded(messagesRef, (snapshot) => {
   const msg = snapshot.val();
   const div = document.createElement("div");
   div.className = (msg.user === username) ? "me" : "other";
   div.style.backgroundColor = getUserColor(msg.user);
 
+  // 🔹 Klickbare Links
   const textWithLinks = msg.text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
   div.innerHTML = `<strong>${msg.user}</strong>: ${textWithLinks}`;
 
@@ -121,6 +134,7 @@ onChildAdded(messagesRef, (snapshot) => {
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
 
+// 🔹 Nachricht senden
 sendBtn.onclick = () => {
   const text = input.value.trim();
   if(!text) return;
